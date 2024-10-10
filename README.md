@@ -10,7 +10,7 @@ List of scripts:
              [2] The final DE table from the results folder of qbic-pipelines/rnadeseq, usually named "final_DE_gene_list.tsv"  
              [3] The baseMean value to filter for (genes with baseMean < this value will be removed from [1]  
              [4] Metadata file from the results folder of qbic-pipelines/rnadeseq, usually named "metadata.tsv"  
-    Typical command to run is  
+    Typical command to run and log the process is:    
     **Rscript filterSalmon.R star_salmon final_DE_gene_list.tsv 5 metadata.tsv 2>&1 | tee filterSalmon.log**
    
 Notes:
