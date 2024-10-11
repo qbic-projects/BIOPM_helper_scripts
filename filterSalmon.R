@@ -8,6 +8,7 @@ args = commandArgs(trailingOnly=TRUE)
 #args[2] <- "final_DE_gene_list.tsv"
 #args[3] <- 5
 #args[4] <- "metadata.tsv"
+#args[5] <- "salmon_tx2gene.tsv"
 
 # test if there is at least one argument: if not, return an error
 if (length(args)==0) {
@@ -32,7 +33,7 @@ sink(fn)
 print(paste("baseMean value used for filtering:",as.numeric(args[3]),sep = " "))
 sink()
 file.copy(args[4], "results/input/")
-
+file.copy(args[5], "results/input/")
 
 #prepare DE list to filter
 de <- read.table(args[2],
@@ -52,8 +53,20 @@ if (nrow(de) == 0) {
 }
 #as salmon folders has Ensembl_ID, work with those...
 de <- unique(de$Ensembl_ID)
+
+tax <- read.table(args[5],
+                 header = F,sep = "\t",na.strings =c(""," ","NaN"),
+                 quote=NULL,stringsAsFactors=F,dec=".",fill=TRUE)
+tax <- subset(tax, tax[,2] %in% de)
+tax <- unique(tax[,1])
+
+#simply merge
+de <- c(de,tax)
+rm(tax)
+
+
 #write to file
-write.table(de, file = "results/output/filtered_Ensembl_IDs.txt" , append = FALSE, quote = FALSE, sep = "\t",
+write.table(de, file = "results/output/filtered_Ensembl_genes_transcript_IDs.txt" , append = FALSE, quote = FALSE, sep = "\t",
             eol = "\n", na = "NA", dec = ".", row.names = T,  
             col.names = F, qmethod = c("escape", "double"))
 
@@ -88,7 +101,9 @@ for (i in 1:length(codes)) {
       tmp <- read.table(fn[f],
                         header = T,sep = "\t",na.strings =c(""," ","NaN"),
                         quote=NULL,stringsAsFactors=F,dec=".",fill=TRUE)
+      print(paste("Initial length of table ",fn[f], ": ",nrow(tmp),sep = ""))
       tmp <- subset(tmp,!Name %in% de)
+      print(paste("Final length of table ",fn[f], ": ",nrow(tmp),sep = ""))
       nn <- basename(fn[f])
       write.table(tmp, file = paste(wd,nn,sep="/"), append = FALSE, quote = FALSE, sep = "\t",
                   eol = "\n", na = "NA", dec = ".", row.names = T,  
